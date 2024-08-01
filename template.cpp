@@ -75,6 +75,28 @@ namespace Math {
             prime_table[i] = last_prime;
         }
     }
+
+    void prime_factors(map<int, int>& m, int n) {
+        set<int> primes;
+        while (n % 2 == 0) {
+            primes.insert(2);
+            n = n/2;
+        }
+
+        for (int i = 3; i <= sqrt(n); i = i + 2) {
+            while (n % i == 0) {
+                primes.insert(i);
+                n = n/i;
+            }
+        }
+
+        if (n > 2)
+            primes.insert(n);
+
+        for (auto& e : primes) {
+            m[e]++;
+        }
+    }
 }
 
 // Binary Search

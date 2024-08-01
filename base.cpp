@@ -31,8 +31,8 @@ using pll = pair<ll, ll>;
 
 const ll LL_MAX = 9223372036854775807;
 const int MAX = 2147483647;
-const int MOD = 1'000'000'000 + 7;
-// const int MOD2 = 998'244'353;
+// const int MOD = 1'000'000'000 + 7;
+const int MOD2 = 998'244'353;
 
 
 void solve() {
@@ -40,8 +40,16 @@ void solve() {
 }
 
 int main() {
+
+    /*
+     * FAST IO
+     * Remember to remove for interactive problems!!!
+     * https://stackoverflow.com/questions/31162367/significance-of-ios-basesync-with-stdiofalse-cin-tienull
+     */
+
     ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
+
 
     // solve();
 
