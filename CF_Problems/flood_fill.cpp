@@ -35,32 +35,50 @@ const int MAX = 2147483647;
 const int MOD2 = 998'244'353;
 
 
-
-void LIS(vector<int>& a, vector<int>& lengths, int n) {
-    vector<int> dp(n + 1, 0);
-    int curr_max = 0;
-
-    for (int i = 0; i < n; i++) {
-        int ind = lower_bound(dp.begin(), dp.begin() + curr_max + 1, a[i]) - dp.begin();
-
-        dp[ind] = a[i];
-        lengths[i] = ind;
-
-        curr_max = max(curr_max, ind);
-    }
-}
-
 void solve() {
     int n;
     cin >> n;
 
-    vector<int> a(n);
-    for (int i = 0; i < n; i++) cin >> a[i];
+    vector<int> temp(n);
+    for (int i = 0; i < n; i++) {
+        cin >> temp[i];
+        temp[i]--;
+    }
 
-    vector<int> len(n);
-    LIS(a, len, n);
+    vector<int> c;
+    c.push_back(temp[0]);
 
-    cout << *max_element(len.begin(), len.end()) << endl;
+    // string s = to_string(c.back());
+    for (int i = 1; i < n; i++) {
+        if (c.back() != temp[i]) {
+            c.push_back(temp[i]);
+            // s += " " + to_string(c.back());
+        }
+    }
+
+    // cout << s << endl;
+
+    n = c.size();
+
+    vector<vector<int>> dp(n, vector<int>(n, MAX));
+
+    for (int i = 0; i < n; i++) dp[i][i] = 0;
+
+    for (int i = 0; i < n; i++) {
+        // dp[i][0] = min(dp[i][0], )
+        for (int j = i - 1; j >= 0; j--) {
+
+
+            dp[i][j] = min(dp[i][j], dp[i][j + 1] + (c[j] != c[j + 1]));
+
+            dp[i][j] = min(dp[i][j], dp[i - 1][j] + (c[j] != c[i]));
+
+
+            // cout << i << " " << j << " " << dp[i][j] << endl;
+        }
+    }
+
+    cout << dp[n - 1][0] << endl;
 }
 
 int main() {

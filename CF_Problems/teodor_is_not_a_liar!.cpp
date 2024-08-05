@@ -36,12 +36,37 @@ const int MOD2 = 998'244'353;
 
 
 
-void LIS(vector<int>& a, vector<int>& lengths, int n) {
+const int N = 1e5 + 10;
+int tree[N * 2];
+int n;
+
+// MODIFY TREE (range)
+// O(log(n))
+// [l, r)
+void modify_range(int l, int r, int value) {
+    l += n, r += n;
+    for (; l < r; l >>= 1, r >>= 1) {
+        if (l & 1) tree[l++] += value;
+        if (r & 1) tree[--r] += value;
+    }
+}
+
+// PUSH
+void push() {
+    for (int i = 1; i < n; i++) {
+        tree[i << 1] += tree[i];
+        tree[(i << 1) | 1] += tree[i];
+        tree[i] = 0;
+    }
+}
+
+
+void LIS(vector<int>& a, vector<int>& lengths) {
     vector<int> dp(n + 1, 0);
     int curr_max = 0;
 
     for (int i = 0; i < n; i++) {
-        int ind = lower_bound(dp.begin(), dp.begin() + curr_max + 1, a[i]) - dp.begin();
+        int ind = upper_bound(dp.begin(), dp.begin() + curr_max + 1, a[i]) - dp.begin();
 
         dp[ind] = a[i];
         lengths[i] = ind;
@@ -51,16 +76,38 @@ void LIS(vector<int>& a, vector<int>& lengths, int n) {
 }
 
 void solve() {
-    int n;
-    cin >> n;
+    int m;
+    cin >> m >> n;
 
+    memset(tree, 0, sizeof(tree));
+
+    for (int i = 0; i < m; i++) {
+        int l, r;
+        cin >> l >> r;
+        l--, r--;
+
+        // cout << l << " " << r << endl;
+        modify_range(l, r + 1, 1);
+    }
+
+    push();
     vector<int> a(n);
-    for (int i = 0; i < n; i++) cin >> a[i];
+    for (int i = 0; i < n; i++) a[i] = tree[n + i];
 
-    vector<int> len(n);
-    LIS(a, len, n);
+    // for (int i = 0; i < n; i++) cout << a[i] << endl;
+    vector<int> forward(n, 0);
+    LIS(a, forward);
+    vector<int> backward(n, 0);
+    reverse(a.begin(), a.end());
+    LIS(a, backward);
+    reverse(backward.begin(), backward.end());
 
-    cout << *max_element(len.begin(), len.end()) << endl;
+    int ans = 0;
+    for (int i = 0; i < n; i++) {
+        ans = max(ans, forward[i] + (i == n - 1 ? 0 : backward[i + 1]));
+    }
+
+    cout << ans << endl;
 }
 
 int main() {

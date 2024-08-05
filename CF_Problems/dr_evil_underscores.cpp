@@ -35,32 +35,33 @@ const int MAX = 2147483647;
 const int MOD2 = 998'244'353;
 
 
-
-void LIS(vector<int>& a, vector<int>& lengths, int n) {
-    vector<int> dp(n + 1, 0);
-    int curr_max = 0;
-
-    for (int i = 0; i < n; i++) {
-        int ind = lower_bound(dp.begin(), dp.begin() + curr_max + 1, a[i]) - dp.begin();
-
-        dp[ind] = a[i];
-        lengths[i] = ind;
-
-        curr_max = max(curr_max, ind);
-    }
-}
-
 void solve() {
     int n;
     cin >> n;
 
-    vector<int> a(n);
-    for (int i = 0; i < n; i++) cin >> a[i];
+    set<ll> s;
+    for (int i = 0; i < n; i++) {
+        ll t;
+        cin >> t;
+        s.insert(t);
+    }
 
-    vector<int> len(n);
-    LIS(a, len, n);
+    vector<ll> a;
+    for (ll e : s) a.push_back(e);
 
-    cout << *max_element(len.begin(), len.end()) << endl;
+    n = a.size();
+
+    ll l = 0, r = *max_element(a.begin(), a.end());
+    while (l < r) {
+        ll target = l + (r - l) / 2;
+        bool works = true;
+
+
+
+        if (works) {
+            r = target;
+        } else l = target + 1;
+    }
 }
 
 int main() {
@@ -84,6 +85,6 @@ int main() {
     while (t--) {
         solve();
     }
-     */
+    */
 }
 

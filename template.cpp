@@ -342,6 +342,7 @@ namespace Segtree {
 
     // MODIFY TREE (range)
     // O(log(n))
+    // on range [l, r)
     void modify_range(int l, int r, int value) {
         l += n, r += n;
         for (; l < r; l >>= 1, r >>= 1) {
@@ -379,8 +380,11 @@ namespace Segtree {
     void push() {
         for (int i = 1; i < n; i++) {
             tree[i << 1] += tree[i];
+            tree[(i << 1) | 1] += tree[i];
+            tree[i] = 0;
         }
     }
+
 }
 
 
@@ -430,6 +434,42 @@ namespace SqrtDecomp {
             }
 
             ans.push_back(curr);
+        }
+    }
+}
+
+
+namespace LIS {
+
+    // calculate longest non decreasing subsequence
+    // (increasing and equal)
+    void LNDS(vector<int>& a, vector<int>& lengths, int n) {
+        vector<int> dp(n + 1, 0);
+        int curr_max = 0;
+
+        for (int i = 0; i < n; i++) {
+            int ind = upper_bound(dp.begin(), dp.begin() + curr_max + 1, a[i]) - dp.begin();
+
+            dp[ind] = a[i];
+            lengths[i] = ind;
+
+            curr_max = max(curr_max, ind);
+        }
+    }
+
+    // longest increasing subsequence
+    // (strictly increasing)
+    void LIS(vector<int>& a, vector<int>& lengths, int n) {
+        vector<int> dp(n + 1, 0);
+        int curr_max = 0;
+
+        for (int i = 0; i < n; i++) {
+            int ind = lower_bound(dp.begin(), dp.begin() + curr_max + 1, a[i]) - dp.begin();
+
+            dp[ind] = a[i];
+            lengths[i] = ind;
+
+            curr_max = max(curr_max, ind);
         }
     }
 }

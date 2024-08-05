@@ -32,35 +32,28 @@ using pll = pair<ll, ll>;
 const ll LL_MAX = 9223372036854775807;
 const int MAX = 2147483647;
 // const int MOD = 1'000'000'000 + 7;
-const int MOD2 = 998'244'353;
+// const int MOD2 = 998'244'353;
 
-
-
-void LIS(vector<int>& a, vector<int>& lengths, int n) {
-    vector<int> dp(n + 1, 0);
-    int curr_max = 0;
-
-    for (int i = 0; i < n; i++) {
-        int ind = lower_bound(dp.begin(), dp.begin() + curr_max + 1, a[i]) - dp.begin();
-
-        dp[ind] = a[i];
-        lengths[i] = ind;
-
-        curr_max = max(curr_max, ind);
-    }
-}
 
 void solve() {
-    int n;
-    cin >> n;
+    ll n, k;
+    cin >> n >> k;
+
+    string s;
+    cin >> s;
 
     vector<int> a(n);
-    for (int i = 0; i < n; i++) cin >> a[i];
+    for (int i = 0; i < n; i++) a[i] = s[i] - '0';
 
-    vector<int> len(n);
-    LIS(a, len, n);
+    vector<ll> pre0(n + 1, 0);
+    vector<ll> pre1(n + 1, 0);
 
-    cout << *max_element(len.begin(), len.end()) << endl;
+    for (int i = 0; i < n; i++) {
+        pre0[i + 1] = pre0[i] + s[i] == 0;
+        pre1[i + 1] = pre1[i] + s[i] == 1;
+    }
+
+
 }
 
 int main() {
@@ -75,15 +68,14 @@ int main() {
     cin.tie(nullptr);
 
 
-    solve();
+    // solve();
 
-    /*
+    // /*
     int t;
     cin >> t;
 
     while (t--) {
         solve();
     }
-     */
+    // */
 }
-

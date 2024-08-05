@@ -1,5 +1,20 @@
 // #include <cstdio>
 
+
+/*
+ * Problem takeaways:
+ *
+ * It is simple to realize that we can do some sort of bitmask DP for this problem since
+ * a[i] <= 500.
+ *
+ * Our DP is that:
+ *
+ * dp[i] = the maximum value we use to achieve this value i
+ *
+ *
+ *
+ *
+ */
 #include <deque>
 #include <iostream>
 #include <vector>
@@ -35,21 +50,6 @@ const int MAX = 2147483647;
 const int MOD2 = 998'244'353;
 
 
-
-void LIS(vector<int>& a, vector<int>& lengths, int n) {
-    vector<int> dp(n + 1, 0);
-    int curr_max = 0;
-
-    for (int i = 0; i < n; i++) {
-        int ind = lower_bound(dp.begin(), dp.begin() + curr_max + 1, a[i]) - dp.begin();
-
-        dp[ind] = a[i];
-        lengths[i] = ind;
-
-        curr_max = max(curr_max, ind);
-    }
-}
-
 void solve() {
     int n;
     cin >> n;
@@ -57,10 +57,33 @@ void solve() {
     vector<int> a(n);
     for (int i = 0; i < n; i++) cin >> a[i];
 
-    vector<int> len(n);
-    LIS(a, len, n);
+    int full_mask = (1 << 10);
+    vector<int> dp(full_mask, MAX);
+    dp[0] = 0;
 
-    cout << *max_element(len.begin(), len.end()) << endl;
+    for (int i = 0; i < n; i++) {
+        // dp[a[i]] = min(dp[a[i]], a[i]);
+        for (int j = 0; j < full_mask; j++) {
+            if (dp[j] >= a[i]) continue;
+            if ((j ^ a[i]) >= full_mask) continue;
+
+            dp[j ^ a[i]] = min(dp[j ^ a[i]], a[i]);
+        }
+    }
+
+    vector<int> res;
+
+    for (int i = 0; i < full_mask; i++) {
+        if (dp[i] == MAX) continue;
+        res.push_back(i);
+    }
+
+    cout << res.size() << endl;
+    string s = to_string(res[0]);
+    for (int i = 1; i < res.size(); i++) s += " " + to_string(res[i]);
+
+    cout << s << endl;
+
 }
 
 int main() {
@@ -86,4 +109,3 @@ int main() {
     }
      */
 }
-
