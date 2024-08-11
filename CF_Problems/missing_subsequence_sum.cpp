@@ -31,14 +31,44 @@ const int MAX = 2'147'483'647;
 // const int MOD = 1'000'000'000 + 7;
 const int MOD2 = 998'244'353;
 
-/*
- *
- *
- *
- */
+// const int N = 3e5 + 5;
+
+
+#define lsb         __builtin_ctz
+#define msb         __builtin_clz
+
 
 void solve() {
+    int n, k;
+    cin >> n >> k;
 
+    int m = msb(k);
+    int l = lsb(k);
+
+    vector<int> a;
+
+    int max_bits = 10;
+
+
+    for (int i = 0; i < max_bits; i++) {
+        if (i == 1) continue;
+        a.push_back(1 << i);
+    }
+
+    vector<bool> dp((1 << max_bits) + 1, false);
+    dp[0] = true;
+
+    for (int i = 0; i < max_bits; i++) {
+        if (i == 4) continue;
+        for (int j = (1 << max_bits) - 1; j >= 0; j--) {
+            if (dp[j]) dp[j + (1 << i)] = true;
+        }
+    }
+
+    for (int i = 0; i < (1 << max_bits); i++) {
+        if (dp[i]) cout << i << " IN" << endl;
+        else cout << i << " OUT" << endl;
+    }
 }
 
 int main() {

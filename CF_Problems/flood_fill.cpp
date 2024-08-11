@@ -60,25 +60,41 @@ void solve() {
 
     n = c.size();
 
-    vector<vector<int>> dp(n, vector<int>(n, MAX));
+    // vector<vector<vector<int>>> dp(n, vector<vector<int>>(n, vector<int>(2, MAX)));
+    int dp[n][n][2];
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            dp[i][j][0] = MAX;
+            dp[i][j][1] = MAX;
+        }
+    }
 
-    for (int i = 0; i < n; i++) dp[i][i] = 0;
+    // i, j --> [l, r]
+    // 0: we match by color of left side
+    // 1: we match by color of right side
+
+    for (int i = 0; i < n; i++) {
+        dp[i][i][0] = 0;
+        dp[i][i][1] = 0;
+    }
 
     for (int i = 0; i < n; i++) {
         // dp[i][0] = min(dp[i][0], )
         for (int j = i - 1; j >= 0; j--) {
 
 
-            dp[i][j] = min(dp[i][j], dp[i][j + 1] + (c[j] != c[j + 1]));
+            dp[i][j][0] = min(dp[i][j][0], dp[i][j + 1][0] + (c[j] != c[j + 1]));
+            dp[i][j][0] = min(dp[i][j][0], dp[i][j + 1][1] + (c[j] != c[i]));
 
-            dp[i][j] = min(dp[i][j], dp[i - 1][j] + (c[j] != c[i]));
+            dp[i][j][1] = min(dp[i][j][1], dp[i - 1][j][0] + (c[j] != c[i]));
+            dp[i][j][1] = min(dp[i][j][1], dp[i - 1][j][1] + (c[i - 1] != c[i]));
 
 
             // cout << i << " " << j << " " << dp[i][j] << endl;
         }
     }
 
-    cout << dp[n - 1][0] << endl;
+    cout << min(dp[n - 1][0][0],  dp[n - 1][0][1]) << endl;
 }
 
 int main() {
@@ -104,4 +120,3 @@ int main() {
     }
      */
 }
-

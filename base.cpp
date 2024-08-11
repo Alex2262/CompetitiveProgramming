@@ -1,4 +1,6 @@
-// #include <cstdio>
+
+#pragma GCC optimize("O3,unroll-loops")
+// #pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
 
 #include <deque>
 #include <iostream>
@@ -13,13 +15,6 @@
 #include <algorithm>
 #include <cstring>
 
-#define popcount    __builtin_popcount
-#define popcount_ll __builtin_popcountll
-#define lsb         __builtin_ctz
-#define lsb_ll      __builtin_ctzll
-#define msb         __builtin_clz
-#define msb_ll      __builtin_clzll
-#define parity      __builtin_parity
 
 using namespace std;
 using ll = long long;
@@ -29,8 +24,11 @@ using ui = unsigned int;
 using pii = pair<int, int>;
 using pll = pair<ll, ll>;
 
-const ll LL_MAX = 9223372036854775807;
-const int MAX = 2147483647;
+// ~9 * 10 ^ 18
+const ll LL_MAX = 9'223'372'036'854'775'807;
+
+// ~2 * 10 ^ 9
+const int MAX = 2'147'483'647;
 // const int MOD = 1'000'000'000 + 7;
 const int MOD2 = 998'244'353;
 

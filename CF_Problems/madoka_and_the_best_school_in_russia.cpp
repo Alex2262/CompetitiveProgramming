@@ -1,6 +1,4 @@
-
-// #pragma GCC optimize("O3,unroll-loops")
-// #pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
+// #include <cstdio>
 
 #include <deque>
 #include <iostream>
@@ -31,14 +29,28 @@ const int MAX = 2'147'483'647;
 // const int MOD = 1'000'000'000 + 7;
 const int MOD2 = 998'244'353;
 
-/*
- *
- *
- *
- */
 
 void solve() {
+    ll x, d;
+    cin >> x >> d;
 
+    // x must divide d ^ 2
+    // obviously this is because we need two beautiful numbers so they both need a factor of d
+
+    if (x % (d ^ 2) != 0) {
+        cout << "nO" << endl;
+        return;
+    }
+
+    x /= (d ^ 2);
+
+
+
+    set<int> s;
+    s.insert(d * d);
+    for (int i = 2; i <= sqrt(x); i++) {
+        if (i % d == 0) continue;
+    }
 }
 
 int main() {
@@ -53,15 +65,15 @@ int main() {
     cin.tie(nullptr);
 
 
-    // solve();
+    solve();
 
-    // /*
+    /*
     int t;
     cin >> t;
 
     while (t--) {
         solve();
     }
-    // */
+     */
 }
 

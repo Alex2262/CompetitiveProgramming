@@ -31,14 +31,46 @@ const int MAX = 2'147'483'647;
 // const int MOD = 1'000'000'000 + 7;
 const int MOD2 = 998'244'353;
 
-/*
- *
- *
- *
- */
+// const int N = 3e5 + 5;
+
 
 void solve() {
+    ll n, k;
+    cin >> n >> k;
 
+    if (k > n) {
+        cout << "NO" << endl;
+        return;
+    }
+
+    if (k == n) {
+        cout << "YES" << endl;
+        cout << 1 << endl;
+        cout << 1 << endl;
+        return;
+    }
+
+    if (k == 1) {
+        cout << "YES" << endl;
+        cout << 1 << endl;
+        cout << n << endl;
+        return;
+    }
+
+    // a == n - k + 1 and b == 1
+    // If n == 500 and k == 200, then 500 - 200 + 1 = 301. 500 - 301 = 199. 1 + 199 = 200!
+    // n - (n - k + 1) == n - n + k - 1 == k - 1
+
+    ll a = n - k + 1;
+    ll b = 1;
+    if ((n / a) + n - a != k) {
+        cout << "NO" << endl;
+        return;
+    }
+
+    cout << "YES" << endl;
+    cout << 2 << endl;
+    cout << a << " " << b << endl;
 }
 
 int main() {

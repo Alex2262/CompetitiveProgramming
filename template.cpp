@@ -30,10 +30,13 @@ using ui = unsigned int;
 using pii = pair<int, int>;
 using pll = pair<ll, ll>;
 
-const ll LL_MAX = 9223372036854775807;
-const int MAX = 2147483647;
+// ~9 * 10 ^ 18
+const ll LL_MAX = 9'223'372'036'854'775'807;
+
+// ~2 * 10 ^ 9
+const int MAX = 2'147'483'647;
 const int MOD = 1'000'000'000 + 7;
-// const int MOD2 = 998'244'353;
+const int MOD2 = 998'244'353;
 
 // MATH, NUMBER THEORY
 
@@ -45,25 +48,56 @@ namespace Math {
 
     // PRIME NUMBER ALGORITHMS
 
-    vector<bool> prime;
-    vector<bool> prime_table;
-
     // Sieve of Eratosthenes
-    void sieve(int n) {
+    // O(n log log n)
+    vector<bool> sieve(int n) {
+        vector<bool> prime;
         prime.resize(n + 1);
 
+        prime[0] = false;
+        prime[1] = false;
+
         std::fill(prime.begin(), prime.end(), true);
+
+        // We only need to loop up to sqrt(n) since all composite (non-prime) numbers larger than sqrt(n)
+        // obviously have a factor <= sqrt(n). All factors less than sqrt(n) will be solved for,
+        // and their multiples will be marked.
         for (int p = 2; p * p <= n; p++) {
-            if (prime[p]) {
-                for (int i = p * p; i <= n; i += p)
-                    prime[i] = false;
-            }
+            if (!prime[p]) continue;
+
+            // If this number is prime, we must mark all multiples as non-prime.
+            // We can start from p * p because obviously all p * x s.t. x < p will have been marked already
+            for (int i = p * p; i <= n; i += p) prime[i] = false;
         }
+
+        return prime;
+    }
+
+    vector<int> sieve_factors(int n) {
+        vector<int> prime_factor;
+        prime_factor.resize(n + 1);
+
+        prime_factor[0] = 1;  // we should not use this...
+        prime_factor[1] = 1;
+
+        for (int i = 2; i < n; i++) {
+            if (i & 1) prime_factor[i] = i;
+            else prime_factor[i] = 2;
+        }
+
+        for (int p = 3; p * p <= n; p++) {
+            if (prime_factor[p] != p) continue;
+
+            for (int i = p * p; i <= n; i += p) prime_factor[i] = p;
+        }
+
+        return prime_factor;
     }
 
     // Construct a table with each value being the largest prime <= the index of the element
     void fill_table(int n) {
-        sieve(n);
+        vector<bool> prime_table;
+        vector<bool> prime = sieve(n);
 
         prime_table.resize(n + 1);
         std::fill(prime_table.begin(), prime_table.end(), 1);
@@ -77,6 +111,31 @@ namespace Math {
     }
 
     void prime_factors(map<int, int>& m, int n) {
+        while (n % 2 == 0) {
+            m[2]++;
+            n = n / 2;
+        }
+
+        for (int i = 3; i <= sqrt(n); i = i + 2) {
+            while (n % i == 0) {
+                m[i]++;
+                n = n / i;
+            }
+        }
+
+        if (n > 2) m[n]++;
+    }
+
+    void prime_factors_sieve(vector<int>& prime_factor, map<int, int>& m, int n) {
+        if (n <= 1) return;
+
+        while (n > 1) {
+            m[prime_factor[n]]++;
+            n /= prime_factor[n];
+        }
+    }
+
+    void prime_factors_unique(map<int, int>& m, int n) {
         set<int> primes;
         while (n % 2 == 0) {
             primes.insert(2);
@@ -96,6 +155,27 @@ namespace Math {
         for (auto& e : primes) {
             m[e]++;
         }
+    }
+
+    ll bin_exp(ll x, ll y) {
+        ll res = 1;
+        x = x % MOD;
+        while (y > 0) {
+            if (y & 1) res = (res * x) % MOD;
+            y = y >> 1;
+            x = (x * x) % MOD;
+        }
+        return res;
+    }
+
+    ll mod_inverse(ll n) {
+        return bin_exp(n, MOD - 2);
+    }
+
+    // nCr
+    ll binomial(vector<ll>& fac, ll n, ll r) {
+        if (r == 0) return 1;
+        return (fac[n] * mod_inverse(fac[r]) % MOD * mod_inverse(fac[n - r]) % MOD) % MOD;
     }
 }
 
@@ -317,7 +397,7 @@ namespace Segtree {
     // tree[1] is the root
 
     // Max N value
-    const int N = 1e5;
+    const int N = 5e5;
     int tree[N * 2];
     int n;
 

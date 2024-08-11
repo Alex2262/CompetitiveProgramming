@@ -37,8 +37,27 @@ const int MOD2 = 998'244'353;
  *
  */
 
-void solve() {
 
+
+void solve() {
+    int n;
+    cin >> n;
+
+    vector<int> a(n);
+
+    for (int i = 0; i < n; i++) cin >> a[i];
+
+    sort(a.begin(), a.end());
+
+    vector<ll> pre(n + 1, 0);
+    for (int i = 0; i < n; i++) pre[i + 1] = pre[i] + a[i];
+
+    ll best = 0;
+    for (int i = 0; i < n; i++) {
+        if (i > 0 && a[i] == a[i - 1]) continue;
+
+
+    }
 }
 
 int main() {
@@ -53,15 +72,15 @@ int main() {
     cin.tie(nullptr);
 
 
-    // solve();
+    solve();
 
-    // /*
+    /*
     int t;
     cin >> t;
 
     while (t--) {
         solve();
     }
-    // */
+    */
 }
 
