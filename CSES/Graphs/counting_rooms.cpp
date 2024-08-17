@@ -1,3 +1,4 @@
+
 // #pragma GCC optimize("O3,unroll-loops")
 // #pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
 
@@ -42,26 +43,49 @@ const int MOD2 = 998'244'353;
  *
  */
 
+int n, m;
+int mat[1005][1005];
 
-void solve() {
-    int n;
-    cin >> n;
+int dr[4] = {0, 0, -1, 1};
+int dc[4] = {1, -1, 0, 0};
 
-    vector<pll> a(n);
-    for (int i = 0; i < n; i++) { cin >> a[i].first; cin >> a[i].second; }
+void floodfill(int row, int col) {
+    mat[row][col] = 2;
 
-    string s;
+    for (int d = 0; d < 4; d++) {
+        int new_r = row + dr[d];
+        int new_c = col + dc[d];
 
-    for (int i = 0; i < n; i++) {
-        if ()
+        if (new_r < 0 || new_r >= n || new_c < 0 || new_c >= m || mat[new_r][new_c] != 0) continue;
+        floodfill(new_r, new_c);
     }
 }
 
-void multi_solve() {
-    int t;
-    cin >> t;
 
-    while (t--) solve();
+void solve() {
+    cin >> n >> m;
+
+    for (int i = 0; i < n; i++) {
+        string s;
+        cin >> s;
+
+        for (int j = 0; j < m; j++) {
+            if (s[j] == '.') mat[i][j] = 0;
+            else mat[i][j] = 1;
+        }
+    }
+
+    int ans = 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (mat[i][j] == 0) {
+                floodfill(i, j);
+                ans++;
+            }
+        }
+    }
+
+    cout << ans << endl;
 }
 
 int main() {
@@ -75,7 +99,16 @@ int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    // solve();
-    multi_solve();
+
+    solve();
+
+    /*
+    int t;
+    cin >> t;
+
+    while (t--) {
+        solve();
+    }
+    */
 }
 

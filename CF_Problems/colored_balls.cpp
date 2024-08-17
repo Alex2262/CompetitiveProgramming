@@ -14,6 +14,7 @@
 #include <cmath>
 #include <algorithm>
 #include <cstring>
+#include <numeric>
 
 using namespace std;
 using ll = long long;
@@ -33,6 +34,20 @@ const int MOD2 = 998'244'353;
 
 // const int N = 3e5 + 5;
 
+ll bin_exp(ll x, ll y) {
+    ll res = 1;
+    x = x % MOD2;
+    while (y > 0) {
+        if (y & 1) res = (res * x) % MOD2;
+        y = y >> 1;
+        x = (x * x) % MOD2;
+    }
+    return res;
+}
+
+ll mod_inverse(ll n) {
+    return bin_exp(n, MOD2 - 2);
+}
 
 void solve() {
     int n;
@@ -41,34 +56,29 @@ void solve() {
     vector<int> a(n);
     for (int i = 0; i < n; i++) cin >> a[i];
 
-    ll mx = *max_element(a.begin(), a.end());
-    vector<vector<pll>> dp(n + 1, vector<pll>(mx + 1, {0, 0}));
+    ll sum = accumulate(a.begin(), a.end(), 0);
 
-    dp[0][0] = {1, 0};
-    for (int i = 1; i <= n; i++) {
-        ll x = a[i - 1];
-        for (ll j = 0; j <= mx; j++) dp[i][j] = dp[i - 1][j];
+    vector<ll> dp(sum + 1, 0);
+    dp[0] = 1;
 
-        for (ll j = mx; j >= 0; j--) {
-            if (dp[i - 1][j].first) {
-                ll rem = x > j ? x - j : j - x;
-                if (rem > mx) continue;
-                cout << "FOUND " << j << " " << rem << endl;
-                dp[i][rem].first = (dp[i][rem].first + dp[i - 1][j].first) % MOD2;
-                dp[i][rem].second = (dp[i][rem].second + ((dp[i - 1][j].first * x) % MOD2) % MOD2) % MOD2;
-                cout << "DP j " << dp[i - 1][j].first << " " << dp[i - 1][j].second << endl;
-                cout << "DP " << dp[i][rem].first << " " << dp[i][rem].second << endl;
-            }
-        }
 
-        for (ll j = 0; j <= mx; j++) {
-            cout << i << " " << j << " " << dp[i][j].first << " " << dp[i][j].second << endl;
+    for (int i = 0; i < n; i++) {
+        for (ll j = sum - a[i]; j >= 0; j--) {
+            dp[a[i] + j] = (dp[a[i] + j] + dp[j]) % MOD2;
         }
     }
 
+
     ll ans = 0;
-    for (int i = 0; i <= mx; i++) {
-        ans = (ans + dp[n][i].second) % MOD2;
+    for (int i = 0; i <= sum; i++) {
+        ans = (ans + (((i + 1) / 2) * dp[i]) % MOD2) % MOD2;
+    }
+
+    // Fix certain values since we need to account for the dominant color
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < a[i]; j++) {
+            ans = (ans + ((a[i] - (a[i] + j + 1) / 2) * dp[j]) % MOD2) % MOD2;
+        }
     }
 
     cout << ans << endl;

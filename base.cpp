@@ -1,5 +1,4 @@
-
-#pragma GCC optimize("O3,unroll-loops")
+// #pragma GCC optimize("O3,unroll-loops")
 // #pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
 
 #include <deque>
@@ -14,7 +13,8 @@
 #include <cmath>
 #include <algorithm>
 #include <cstring>
-
+#include <numeric>
+#include <functional>
 
 using namespace std;
 using ll = long long;
@@ -32,9 +32,26 @@ const int MAX = 2'147'483'647;
 // const int MOD = 1'000'000'000 + 7;
 const int MOD2 = 998'244'353;
 
+// const int N = 3e5 + 5;
+
+/*
+ *
+ *
+ *
+ *
+ *
+ */
+
 
 void solve() {
 
+}
+
+void multi_solve() {
+    int t;
+    cin >> t;
+
+    while (t--) solve();
 }
 
 int main() {
@@ -48,13 +65,7 @@ int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
 
-
     // solve();
-
-    int t;
-    cin >> t;
-
-    while (t--) {
-        solve();
-    }
+    multi_solve();
 }
+

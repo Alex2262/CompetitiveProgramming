@@ -13,6 +13,7 @@
 #include <cmath>
 #include <algorithm>
 #include <cstring>
+#include <numeric>
 
 #define popcount    __builtin_popcount
 #define popcount_ll __builtin_popcountll
@@ -212,7 +213,7 @@ namespace Graphs {
         }
     }
 
-// Breadth First Search (BFS)
+    // Breadth First Search (BFS)
     void bfs() {
         int n;
         vector<vector<int>> g;
@@ -236,6 +237,63 @@ namespace Graphs {
         }
     }
 
+
+    // O(V + E (log V))
+    void dijkstra(vector<vector<pll>>& g, int n, int src) {
+        priority_queue<pll, vector<pll>, greater<>> pq;
+
+        ll dists[n];
+        for (int i = 0; i < n; i++) dists[i] = 1e16;
+
+        pq.push({0, src});
+        dists[src] = 0;
+
+        while (!pq.empty()) {
+            auto p = pq.top();
+            pq.pop();
+
+            ll dist = p.first;
+            ll node = p.second;
+
+            if (dist > dists[node]) continue; // no longer optimal
+
+            for (auto pc : g[node]) {
+                ll child = pc.first;
+                ll weight = pc.second;
+
+                ll new_dist = dists[node] + weight;
+                if (new_dist < dists[child]) {
+                    dists[child] = new_dist;
+                    pq.push({dists[child], child});
+                }
+            }
+        }
+    }
+
+
+
+    // O(n^3)
+    void floyd_warshall(vector<vector<ll>>& mat) {
+        int n = mat.size();
+
+        // Choose an intermediate vertex k
+        for (int k = 0; k < n; k++) {
+
+            // Pick a vertex to be the source vertex
+            for (int i = 0; i < n; i++) {
+
+                // Pick a vertex to be the destination vertex
+                for (int j = 0; j < n; j++) {
+                    if (mat[i][k] == LL_MAX || mat[k][j] == LL_MAX) continue;
+
+                    ll new_dist = mat[i][k] + mat[k][j];
+                    if (new_dist < mat[i][j]) {
+                        mat[i][j] = new_dist;
+                    }
+                }
+            }
+        }
+    }
 
 /*
  * Topological Sort
