@@ -19,8 +19,8 @@
 #define popcount_ll __builtin_popcountll
 #define lsb         __builtin_ctz
 #define lsb_ll      __builtin_ctzll
-#define msb         __builtin_clz
-#define msb_ll      __builtin_clzll
+#define msb(x)         (31 - __builtin_clz(x))   // change to 32 for uint
+#define msb_ll(x)      (63 - __builtin_clzll(x)) // change to 64 for ull
 #define parity      __builtin_parity
 
 using namespace std;
@@ -159,13 +159,15 @@ namespace Math {
     }
 
     ll bin_exp(ll x, ll y) {
+        x %= MOD;
+
         ll res = 1;
-        x = x % MOD;
         while (y > 0) {
             if (y & 1) res = (res * x) % MOD;
-            y = y >> 1;
             x = (x * x) % MOD;
+            y = y >> 1;
         }
+
         return res;
     }
 
@@ -174,9 +176,10 @@ namespace Math {
     }
 
     // nCr
-    ll binomial(vector<ll>& fac, ll n, ll r) {
-        if (r == 0) return 1;
-        return (fac[n] * mod_inverse(fac[r]) % MOD * mod_inverse(fac[n - r]) % MOD) % MOD;
+    ll binomial(vector<ll>& fac, vector<ll>& inv, ll n, ll r) {
+        if (r == 0 || r > n) return 1;
+        // return (fac[n] * mod_inverse(fac[r]) % MOD * mod_inverse(fac[n - r]) % MOD) % MOD;
+        return (((fac[n] * inv[r]) % MOD) * inv[n - r]) % MOD;
     }
 }
 
@@ -434,6 +437,36 @@ namespace MergeSort {
 }
 
 
+namespace Trie {
+    const int K = 26;
+    struct Vertex {
+        int next[K];
+        bool output = false;
+
+        Vertex() {
+            fill(begin(next), end(next), -1);
+        }
+    };
+
+    vector<Vertex> trie(1);
+
+    void add_string(string& s) {
+        int v = 0;
+        for (char ch : s) {
+            int c = ch - 'a';
+            if (trie[v].next[c] == -1) {
+                trie[v].next[c] = trie.size();
+                trie.emplace_back();
+            }
+
+            v = trie[v].next[c];
+        }
+
+        trie[v].output = true;
+    }
+}
+
+
 /*
  * RANGE QUERIES
  *
@@ -526,6 +559,74 @@ namespace Segtree {
 }
 
 
+namespace BIT {
+    const int N = 2e5;
+    int bit[N + 1];
+    int sz;
+
+    int query_sum(int p) {
+        int res = 0;
+        p++;
+
+        while (p > 0) {
+            res += bit[p];
+            p -= p & (-p);
+        }
+
+        return res;
+    }
+
+    void modify_point(int p, int value) {
+        p++;
+        while (p <= sz) {
+            bit[p] += value;
+            p += p & (-p);
+        }
+    }
+
+    void build(vector<int>& a) {
+        for (int i = 0; i <= sz; i++) bit[i] = 0;
+        for (int i = 0; i < sz; i++) modify_point(i + 1, a[i]);
+    }
+
+    /*
+     * Find the K-th smallest element
+     * Time  complexity: O(log^2 (mx)) time where mx is the maximum element
+     * Space complexity: O(mx)
+     * We can use this for mx <= 5 * 10^7 which is ~200 mb space
+     *
+     */
+
+    void insert_element(int x) {
+        modify_point(x, 1);
+    }
+
+    void delete_element(int x) {
+        modify_point(x, -1);
+    }
+
+    int get_rank(int x) {
+        return query_sum(x);
+    }
+
+    int kth_smallest(int k) {
+        int l = 0;
+        int r = sz - 1;
+        int ans = 0;
+
+        while (l <= r) {
+            int mid = l + (r - l) / 2;
+            if (k <= query_sum(mid)) {
+                ans = mid;
+                r = mid - 1;
+            } else l = mid + 1;
+        }
+
+        return ans;
+    }
+}
+
+
 namespace DifferenceArray {
     // https://codeforces.com/blog/entry/78762
 
@@ -574,6 +675,11 @@ namespace SqrtDecomp {
             ans.push_back(curr);
         }
     }
+}
+
+
+namespace Mo {
+    // https://codeforces.com/blog/entry/61203
 }
 
 

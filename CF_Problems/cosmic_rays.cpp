@@ -1,5 +1,15 @@
-#pragma GCC optimize("O3,unroll-loops")
+// #pragma GCC optimize("O3,unroll-loops")
 // #pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
+
+/*
+ * idea for the problem isn't very hard to come up with,
+ * but we need to just think of this simple implementation for the problem with stacks instead of thinking
+ * about segtree or PQ or any more complex DS.
+ *
+ *
+ *
+ */
+
 
 #include <deque>
 #include <iostream>
@@ -43,55 +53,50 @@ const int MOD = 1'000'000'000 + 7;
  */
 
 
-void dfs(vector<vector<int>>& g, vector<int>& c, vector<ll>& dp, int node, int parent, ll& ans) {
-
-    dp[c[node]]++;
-    ll start = dp[c[node]];
-
-    for (int child : g[node]) {
-        if (child == parent) continue;
-        ll start2 = dp[c[node]];
-        dfs(g, c, dp, child, node, ans);
-        ll amt2 = dp[c[node]] - start2;
-        ans += amt2 * (amt2 - 1) / 2;
-    }
-
-    ll amt = dp[c[node]] - start;
-    ans += amt;
-    dp[c[node]] = start;
-}
-
 void solve() {
     int n;
     cin >> n;
 
-    vector<int> c(n);
-    for (int i = 0; i < n; i++) {
-        cin >> c[i];
-        c[i]--;
-    }
-
-    vector<vector<int>> g(n);
-
-    for (int i = 0; i < n - 1; i++) {
-        int u, v;
-        cin >> u >> v;
-        u--, v--;
-
-        g[u].push_back(v);
-        g[v].push_back(u);
-    }
-
-    ll ans = 0;
-    vector<ll> dp(n, 0);
-
-    dfs(g, c, dp, 0, -1, ans);
+    vector<ll> a(n);
+    vector<int> b(n);
 
     for (int i = 0; i < n; i++) {
-        ans += dp[i] * (dp[i] - 1) / 2;
+        cin >> a[i];
+        cin >> b[i];
     }
 
-    cout << ans << endl;
+    stack<pll> s;
+    ll curr = 0;
+
+
+
+    for (int i = 0; i < n; i++) {
+        ll inter = 0;
+
+        while (!s.empty()) {
+            auto p = s.top();
+            // cout << i << " " << p.first << " " << p.second << endl;
+
+            if (p.second == b[i]) {
+                a[i] += p.first - inter;
+                s.pop();
+                continue;
+            }
+
+            if (p.first >= a[i]) break;
+
+            s.pop();
+            inter = max(inter, p.first);
+        }
+
+        s.emplace(a[i], b[i]);
+        curr = max(curr, a[i]);
+        cout << curr;
+
+        if (i != n - 1) cout << " ";
+    }
+
+    cout << endl;
 }
 
 void multi_solve() {

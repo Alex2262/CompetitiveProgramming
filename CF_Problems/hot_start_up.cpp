@@ -43,55 +43,45 @@ const int MOD = 1'000'000'000 + 7;
  */
 
 
-void dfs(vector<vector<int>>& g, vector<int>& c, vector<ll>& dp, int node, int parent, ll& ans) {
-
-    dp[c[node]]++;
-    ll start = dp[c[node]];
-
-    for (int child : g[node]) {
-        if (child == parent) continue;
-        ll start2 = dp[c[node]];
-        dfs(g, c, dp, child, node, ans);
-        ll amt2 = dp[c[node]] - start2;
-        ans += amt2 * (amt2 - 1) / 2;
-    }
-
-    ll amt = dp[c[node]] - start;
-    ans += amt;
-    dp[c[node]] = start;
-}
-
 void solve() {
-    int n;
-    cin >> n;
+    int n, k;
+    cin >> n >> k;
 
-    vector<int> c(n);
-    for (int i = 0; i < n; i++) {
-        cin >> c[i];
-        c[i]--;
-    }
-
-    vector<vector<int>> g(n);
-
-    for (int i = 0; i < n - 1; i++) {
-        int u, v;
-        cin >> u >> v;
-        u--, v--;
-
-        g[u].push_back(v);
-        g[v].push_back(u);
-    }
-
-    ll ans = 0;
-    vector<ll> dp(n, 0);
-
-    dfs(g, c, dp, 0, -1, ans);
+    vector<int> a(n);
+    vector<ll> c(k), h(k);
 
     for (int i = 0; i < n; i++) {
-        ans += dp[i] * (dp[i] - 1) / 2;
+        cin >> a[i];
+        a[i]--;
     }
 
-    cout << ans << endl;
+    for (int i = 0; i < k; i++) cin >> c[i];
+    for (int i = 0; i < k; i++) cin >> h[i];
+
+    vector<ll> dp(k + 1, LL_MAX);
+    dp[a[0]] = c[a[0]];
+
+    for (int i = 1; i < n; i++) {
+        vector<ll> next(k + 1, LL_MAX);
+        for (int j = 0; j < k; j++) {
+            if (dp[j] == LL_MAX) continue;
+            next[j] = dp[j] + (a[i] == a[i - 1] ? h[a[i]] : c[a[i]]);
+        }
+
+        ll mn = LL_MAX;
+        for (int j = 0; j < k; j++) mn = min(mn, dp[j]);
+
+        if (dp[a[i]] != LL_MAX) next[a[i - 1]] = min(next[a[i - 1]], dp[a[i]] + h[a[i]]);
+        next[a[i - 1]] = min(next[a[i - 1]], mn + c[a[i]]);
+
+        dp = next;
+    }
+
+
+    ll mn = LL_MAX;
+    for (int j = 0; j < k; j++) mn = min(mn, dp[j]);
+
+    cout << mn << endl;
 }
 
 void multi_solve() {

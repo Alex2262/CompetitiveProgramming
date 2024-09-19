@@ -42,54 +42,49 @@ const int MOD = 1'000'000'000 + 7;
  *
  */
 
-
-void dfs(vector<vector<int>>& g, vector<int>& c, vector<ll>& dp, int node, int parent, ll& ans) {
-
-    dp[c[node]]++;
-    ll start = dp[c[node]];
-
-    for (int child : g[node]) {
-        if (child == parent) continue;
-        ll start2 = dp[c[node]];
-        dfs(g, c, dp, child, node, ans);
-        ll amt2 = dp[c[node]] - start2;
-        ans += amt2 * (amt2 - 1) / 2;
-    }
-
-    ll amt = dp[c[node]] - start;
-    ans += amt;
-    dp[c[node]] = start;
+ll gcd(ll a, ll b) {
+    if (b == 0) return a;
+    return gcd(b, (a % b));
 }
 
 void solve() {
-    int n;
-    cin >> n;
+    ll n, k;
+    cin >> n >> k;
 
-    vector<int> c(n);
-    for (int i = 0; i < n; i++) {
-        cin >> c[i];
-        c[i]--;
-    }
+    vector<ll> a(n);
+    for (int i = 0; i < n; i++) cin >> a[i];
 
-    vector<vector<int>> g(n);
-
-    for (int i = 0; i < n - 1; i++) {
-        int u, v;
-        cin >> u >> v;
-        u--, v--;
-
-        g[u].push_back(v);
-        g[v].push_back(u);
-    }
-
-    ll ans = 0;
-    vector<ll> dp(n, 0);
-
-    dfs(g, c, dp, 0, -1, ans);
+    ll g = a[0];
 
     for (int i = 0; i < n; i++) {
-        ans += dp[i] * (dp[i] - 1) / 2;
+        g = gcd(g, a[i]);
     }
+
+    if (n > 1) {
+        for (int i = 0; i < n; i++) {
+            a[i] = i * g;
+        }
+    }
+
+    ll prev = -1;
+    ll ans = -1;
+
+    for (int i = 0; i < n; i++) {
+        ll diff = a[i] - prev - 1;
+
+        if (diff >= k) {
+            ans = prev + k;
+            k = 0;
+            break;
+        }
+
+        k -= diff;
+        prev = a[i];
+
+        ans = a[i];
+    }
+
+    ans += k;
 
     cout << ans << endl;
 }

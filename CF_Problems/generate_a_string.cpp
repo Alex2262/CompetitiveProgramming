@@ -35,7 +35,13 @@ const int MOD = 1'000'000'000 + 7;
 // const int N = 3e5 + 5;
 
 /*
+ * Problem takeways:
  *
+ * We can figure out that it is always optimal to only have at most 1 + or - after some multiplication
+ *
+ * For example, whenever we have *++ or *--, that can be simplified into +* or -*.
+ *
+ * Thus, our DP is simple and for each i we only have to consider the previous and latter element.
  *
  *
  *
@@ -43,55 +49,26 @@ const int MOD = 1'000'000'000 + 7;
  */
 
 
-void dfs(vector<vector<int>>& g, vector<int>& c, vector<ll>& dp, int node, int parent, ll& ans) {
-
-    dp[c[node]]++;
-    ll start = dp[c[node]];
-
-    for (int child : g[node]) {
-        if (child == parent) continue;
-        ll start2 = dp[c[node]];
-        dfs(g, c, dp, child, node, ans);
-        ll amt2 = dp[c[node]] - start2;
-        ans += amt2 * (amt2 - 1) / 2;
-    }
-
-    ll amt = dp[c[node]] - start;
-    ans += amt;
-    dp[c[node]] = start;
-}
-
 void solve() {
-    int n;
-    cin >> n;
+    ll n, x, y;
+    cin >> n >> x >> y;
 
-    vector<int> c(n);
-    for (int i = 0; i < n; i++) {
-        cin >> c[i];
-        c[i]--;
+    vector<ll> dp;
+    dp.reserve(2 * n + 1);
+    dp.resize(2 * n + 1);
+
+    fill(dp.begin(), dp.end(), LL_MAX);
+    dp[0] = 0;
+
+    for (ll i = 1; i <= 2 * n; i++) {
+        dp[i] = dp[i - 1] + x;
+        if (i % 2 == 0) {
+            dp[i] = min(dp[i], dp[i / 2] + y);
+            dp[i - 1] = min(dp[i - 1], dp[i] + x);
+        }
     }
 
-    vector<vector<int>> g(n);
-
-    for (int i = 0; i < n - 1; i++) {
-        int u, v;
-        cin >> u >> v;
-        u--, v--;
-
-        g[u].push_back(v);
-        g[v].push_back(u);
-    }
-
-    ll ans = 0;
-    vector<ll> dp(n, 0);
-
-    dfs(g, c, dp, 0, -1, ans);
-
-    for (int i = 0; i < n; i++) {
-        ans += dp[i] * (dp[i] - 1) / 2;
-    }
-
-    cout << ans << endl;
+    cout << dp[n] << endl;
 }
 
 void multi_solve() {
@@ -112,7 +89,7 @@ int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    // solve();
-    multi_solve();
+    solve();
+    // multi_solve();
 }
 
