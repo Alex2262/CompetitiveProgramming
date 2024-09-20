@@ -44,7 +44,42 @@ const int MOD = 1'000'000'000 + 7;
 
 
 void solve() {
+    int n, k;
+    cin >> n >> k;
 
+    vector<int> a(n);
+    vector<ll> c(k), h(k);
+
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+        a[i]--;
+    }
+
+    for (int i = 0; i < k; i++) cin >> c[i];
+    for (int i = 0; i < k; i++) cin >> h[i];
+
+    ll ans = 0;
+    for (int i = 0; i < n; i++) ans += c[a[i]];
+
+    vector<ll> dp(k + 1, -LL_MAX);
+    dp[a[0]] = 0;
+
+    ll best = 0;
+    ll add = 0;
+
+    for (int i = 1; i < n; i++) {
+        ll val = max(best, dp[a[i]] + add + c[a[i]] - h[a[i]]);
+
+        if (a[i] == a[i - 1]) {
+            best += c[a[i]] - h[a[i]];
+            add += c[a[i]] - h[a[i]];
+        }
+
+        dp[a[i - 1]] = max(dp[a[i - 1]], val - add);
+        best = max(best, val);
+    }
+
+    cout << ans - best << endl;
 }
 
 void multi_solve() {
