@@ -14,6 +14,11 @@
 #include <algorithm>
 #include <cstring>
 #include <numeric>
+#include <functional>
+#include <random>
+#include <chrono>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
 
 #define popcount    __builtin_popcount
 #define popcount_ll __builtin_popcountll
@@ -24,12 +29,18 @@
 #define parity      __builtin_parity
 
 using namespace std;
+using namespace __gnu_pbds;
+
 using ll = long long;
 using ull = unsigned long long;
 using ui = unsigned int;
 
 using pii = pair<int, int>;
 using pll = pair<ll, ll>;
+
+// PBDS
+template <typename T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
 // ~9 * 10 ^ 18
 const ll LL_MAX = 9'223'372'036'854'775'807;
@@ -42,7 +53,7 @@ const int MOD2 = 998'244'353;
 // MATH, NUMBER THEORY
 
 namespace Math {
-    int gcd(int a, int b) {
+    ll gcd(ll a, ll b) {
         if (b == 0) return a;
         return gcd(b, (a % b));
     }
@@ -74,6 +85,7 @@ namespace Math {
         return prime;
     }
 
+    // O(n log log n)
     vector<int> sieve_factors(int n) {
         vector<int> prime_factor;
         prime_factor.resize(n + 1);
@@ -111,6 +123,7 @@ namespace Math {
         }
     }
 
+    // O (n sqrt n)
     void prime_factors(map<int, int>& m, int n) {
         while (n % 2 == 0) {
             m[2]++;
@@ -127,6 +140,8 @@ namespace Math {
         if (n > 2) m[n]++;
     }
 
+    // O(n log n)
+    // requires filling table with sieve_factors
     void prime_factors_sieve(vector<int>& prime_factor, map<int, int>& m, int n) {
         if (n <= 1) return;
 
@@ -158,7 +173,7 @@ namespace Math {
         }
     }
 
-    ll bin_exp(ll x, ll y) {
+    ll binpow(ll x, ll y) {
         x %= MOD;
 
         ll res = 1;
@@ -172,7 +187,7 @@ namespace Math {
     }
 
     ll mod_inverse(ll n) {
-        return bin_exp(n, MOD - 2);
+        return binpow(n, MOD - 2);
     }
 
     // nCr
@@ -198,6 +213,22 @@ namespace BinSearch {
         }
 
         return l;
+    }
+}
+
+
+// random stuff
+namespace Hash {
+    mt19937_64 rng(chrono::duration_cast<chrono::nanoseconds>(chrono::steady_clock::now().time_since_epoch()).count());
+    uniform_int_distribution<ll> dist(1, LL_MAX);
+
+    ull seed() {
+        return dist(rng);
+    }
+
+    ull rand64(ull s) {
+        s ^= s >> 12, s ^= s << 25, s ^= s >> 27;
+        return s * 2685821657736338717LL;
     }
 }
 
@@ -246,7 +277,7 @@ namespace Graphs {
         priority_queue<pll, vector<pll>, greater<>> pq;
 
         ll dists[n];
-        for (int i = 0; i < n; i++) dists[i] = 1e16;
+        for (int i = 0; i < n; i++) dists[i] = LL_MAX;
 
         pq.push({0, src});
         dists[src] = 0;
@@ -263,6 +294,8 @@ namespace Graphs {
             for (auto pc : g[node]) {
                 ll child = pc.first;
                 ll weight = pc.second;
+
+                // if (dists[node] == LL_MAX) continue;
 
                 ll new_dist = dists[node] + weight;
                 if (new_dist < dists[child]) {
@@ -369,22 +402,99 @@ namespace Graphs {
  */
 
 namespace DSU {
-    vector<int> parent;
 
-    void make_set(int v) {
-        parent[v] = v;
+    class DSU {
+
+    private:
+        vector<int> parents;
+        vector<int> sizes;
+
+    public:
+        DSU(int size) : parents(size), sizes(size + 1, 1) {
+            for (int i = 0; i < size; i++) parents[i] = i;
+        }
+
+        int find(int v) {
+            if (v == parents[v]) return v;
+            return parents[v] = find(parents[v]);
+        }
+
+        void unite(int a, int b) {
+            a = find(a);
+            b = find(b);
+            if (a == b) return;
+
+            if (sizes[a] < sizes[b]) swap(a, b);
+            parents[b] = a;
+            sizes[a] += sizes[b];
+        }
+    };
+}
+
+
+namespace BinLift {
+
+
+
+    // int num_layers = __lg(n) + 1;
+    // vector<vector<int>> bl_table(num_layers, vector<int>(n, -1));
+    // fill_bl_table(bl_table, parents);
+
+
+    void fill_bl_table(vector<vector<int>>& bl_table, vector<int>& parents) {
+
+        int num_layers = bl_table.size();
+        int n = bl_table[0].size();
+
+        for (int i = 0; i < n; i++) bl_table[0][i] = parents[i];
+
+        for (int layer = 1; layer < num_layers; layer++) {
+            for (int i = 0; i < n; i++) {
+                int p1 = bl_table[layer - 1][i];
+
+                if (p1 == -1) {
+                    bl_table[layer][i] = -1;
+                    continue;
+                }
+
+                int p2 = bl_table[layer - 1][p1];
+                bl_table[layer][i] = p2;
+            }
+        }
     }
 
-    int find_set(int v) {
-        if (v == parent[v]) return v;
-        return parent[v] = find_set(parent[v]);
+
+    int kth_parent(vector<vector<int>>& bl_table, int node, int k) {
+        int num_layers = bl_table.size();
+
+        int res = node;
+        for (int pow = 0; pow < num_layers; pow++) {
+            if (k & (1 << pow)) {
+                res = bl_table[pow][res];
+                if (res == -1) break;
+            }
+        }
+
+        return res;
     }
 
-    void union_sets(int a, int b) {
-        a = find_set(a);
-        b = find_set(b);
-        if (a != b)
-            parent[b] = a;
+
+    int lca(vector<vector<int>>& bl_table, vector<int>& depth, int node1, int node2) {
+        if (depth[node1] < depth[node2]) swap(node1, node2);
+
+        // lift node1 up to the same level as node2
+        node1 = kth_parent(bl_table, node1, depth[node1] - depth[node2]);
+        if (node1 == node2) return node2;
+
+        int num_layers = bl_table.size();
+        for (int i = num_layers - 1; i >= 0; i--) {
+            if (bl_table[i][node1] == bl_table[i][node2]) continue;
+
+            node1 = bl_table[i][node1];
+            node2 = bl_table[i][node2];
+        }
+
+        return bl_table[0][node1];
     }
 }
 
@@ -487,74 +597,104 @@ namespace Segtree {
     // tree[0] doesn't hold any value
     // tree[1] is the root
 
-    // Max N value
-    const int N = 5e5;
-    int tree[N * 2];
-    int n;
+    /*
+     * BUILD TREE
+     * O(n)
+     * Note that:
+     * 1. i << 1     == i * 2
+     * 2. i << 1 | 1 == i * 2 + 1
+     *
+     * MODIFY TREE (single point)
+     * O(log(n))
+     * Note that:
+     * p ^ 1 ensures we add both child nodes
+     *
+     * MODIFY TREE (range)
+     * O(log(n))
+     * on range [l, r)
+     *
+     * QUERY (range)
+     * O(log(n))
+     * sum on interval [l, r)
+     *
+     * QUERY POINT
+     * O(log(n))
+     *
+     * If we ever use this we cannot build the tree!!!!!
+     * We only store the updates in the segtree.
+     */
 
-    // BUILD TREE
-    // O(n)
-    // Note that:
-    // 1. i << 1     == i * 2
-    // 2. i << 1 | 1 == i * 2 + 1
-    void build() {
-        for (int i = n - 1; i > 0; i--) tree[i] = tree[i << 1] + tree[i << 1 | 1];
-    }
 
-    // MODIFY TREE (single point)
-    // O(log(n))
-    // Note that:
-    // p ^ 1 ensures we add both child nodes
-    void modify_point(int p, int value) {
-        p += n;
-        tree[p] = value;
-        for (; p > 1; p >>= 1) tree[p >> 1] = tree[p] + tree[p ^ 1];
-    }
+    template <typename T> class Segtree {
 
-    // MODIFY TREE (range)
-    // O(log(n))
-    // on range [l, r)
-    void modify_range(int l, int r, int value) {
-        l += n, r += n;
-        for (; l < r; l >>= 1, r >>= 1) {
-            if (l & 1) tree[l++] += value;
-            if (r & 1) tree[--r] += value;
-        }
-    }
+    private:
+        vector<T> tree;
+        int size;
 
-    // QUERY (range)
-    // O(log(n))
-    // sum on interval [l, r)
-    int query_range(int l, int r) {
-        l += n, r += n;
-        int res = 0;
-        for (; l < r; l >>= 1, r >>= 1) {
-            if (l & 1) res += tree[l++];
-            if (r & 1) res += tree[--r]; // Remember that r is the excluded bound
+        T op(T a, T b) {
+            return a + b;
         }
 
-        return res;
-    }
+        T default_value = 0;  // TODO: CHANGE THIS FOR MIN/MAX
 
-    // QUERY POINT
-    // O(log(n))
-    // If we ever use this we cannot build the tree!!!!!
-    // We only store the updates in the segtree.
-    int query_point(int p) {
-        p += n;
-        int res = 0;
-        for (; p > 0; p >>= 1) res += tree[p];
-        return res;
-    }
-
-    // PUSH
-    void push() {
-        for (int i = 1; i < n; i++) {
-            tree[i << 1] += tree[i];
-            tree[(i << 1) | 1] += tree[i];
-            tree[i] = 0;
+    public:
+        Segtree(vector<T>& container) : tree(2 * container.size(), default_value) {
+            size = container.size();
+            for (int i = 0; i < size; i++) tree[i + size] = container[i];
+            build();
         }
-    }
+
+        void build() {
+            for (int i = size - 1; i > 0; i--) tree[i] = op(tree[i << 1], tree[i << 1 | 1]);
+        }
+
+        void modify_point(int p, T value) {
+            p += size;
+            tree[p] = value;
+            for (; p > 1; p >>= 1) tree[p >> 1] = op(tree[p], tree[p ^ 1]);
+        }
+
+        T query_range(int l, int r) {
+            l += size, r += size;
+            T res = default_value;
+            for (; l < r; l >>= 1, r >>= 1) {
+                if (l & 1) res = op(res, tree[l++]);
+                if (r & 1) res = op(res, tree[--r]);
+            }
+
+            return res;
+        }
+
+        void modify_range(int l, int r, T value) {
+            l += size, r += size;
+            for (; l < r; l >>= 1, r >>= 1) {
+                if (l & 1) {
+                    tree[l] = op(tree[l], value);
+                    l++;
+                }
+
+                if (r & 1) {
+                    r--;
+                    tree[r] = op(tree[r], value);
+                }
+            }
+        }
+
+        T query_point(int p) {
+            p += size;
+            T res = default_value;
+            for (; p > 0; p >>= 1) res = op(res, tree[p]);
+            return res;
+        }
+
+        void push() {
+            for (int i = 1; i < size; i++) {
+                tree[i << 1] = op(tree[i << 1], tree[i]);
+                tree[(i << 1) | 1] = op(tree[(i << 1) | 1], tree[i]);
+                tree[i] = 0;
+            }
+        }
+    };
 
 }
 
@@ -679,7 +819,94 @@ namespace SqrtDecomp {
 
 
 namespace Mo {
+
+    // Mo's Algorithm
+    // Time complexity: O((N + Q) * F * sqrt(N)) where O(F) is the complexity of add and remove functions
+
+    // maybe let block size be sqrt(Q/N) when ratio of Q to N is big?
+
+    // notes:
+
+    // In odd blocks, sort the right index in ascending order
+    // In even blocks, sort the right index in descending order
+    // This minimizes movement of the right pointer
+
+
     // https://codeforces.com/blog/entry/61203
+
+    // https://cp-algorithms.com/data_structures/sqrt_decomposition.html
+
+    void rem(int idx);  // TODO: remove value at idx from data structure
+    void add(int idx);  // TODO: add value at idx from data structure
+    int get();          // TODO: extract the current answer of the data structure
+
+    const int BLOCK_SIZE = 700; // TODO: optimize
+
+    struct Query {
+        int l, r, idx;
+    };
+
+    bool cmp(Query& a, Query& b) {
+        int a_block = a.l / BLOCK_SIZE;
+        int b_block = b.l / BLOCK_SIZE;
+
+        if (a_block != b_block) return a_block < b_block;
+
+        if (a_block & 1) return a.r < b.r;
+        return a.r > b.r;
+    }
+
+    vector<int> mo_algorithm(vector<Query> qs) {
+        vector<int> ans(qs.size());
+
+        sort(qs.begin(), qs.end(), cmp);
+
+        // TODO: initialize data structure
+
+        int curr_l = 0;
+        int curr_r = -1;
+
+        for (Query query : qs) {
+            while (curr_l > query.l) add(--curr_l);
+            while (curr_r < query.r) add(++curr_r);
+            while (curr_l < query.l) rem(curr_l++);
+            while (curr_r > query.r) rem(curr_r--);
+
+            ans[query.idx] = get();
+        }
+
+        return ans;
+    }
+
+    // MO UPDATES OR MODIFICATION
+
+    // https://codeforces.com/blog/entry/72690
+    // O(S * Q + Q * N^2 / S^2)
+    // Optimum block size S = (2n^2) ^ 1/3
+    // Time complexity: O(Q * N^2/3)
+
+    vector<int> mo_update(vector<Query> qs) {
+        vector<int> ans(qs.size());
+
+        sort(qs.begin(), qs.end(), cmp);
+
+        // TODO: initialize data structure
+
+        int curr_l = 0;
+        int curr_r = -1;
+        int curr_t = -1;
+
+        for (Query query : qs) {
+            while (curr_l > query.l) add(--curr_l);
+            while (curr_r < query.r) add(++curr_r);
+            while (curr_l < query.l) rem(curr_l++);
+            while (curr_r > query.r) rem(curr_r--);
+
+            ans[query.idx] = get();
+        }
+
+        return ans;
+    }
 }
 
 
@@ -714,6 +941,32 @@ namespace LIS {
             lengths[i] = ind;
 
             curr_max = max(curr_max, ind);
+        }
+    }
+}
+
+
+namespace Strings {
+
+    void zfunc(vector<int>& z, string& s) {
+        int n = s.size();
+        z[0] = 0;
+
+        // [l, r)
+        int l = 0, r = 0;
+        for (int i = 1; i < n; i++) {
+            if (i < r) {
+                z[i] = min(r - i, z[i - l]);
+            }
+
+            while (i + z[i] < n && s[z[i]] == s[i + z[i]]) {
+                z[i]++;
+            }
+
+            if (i + z[i] > r) {
+                l = i;
+                r = i + z[i];
+            }
         }
     }
 }
